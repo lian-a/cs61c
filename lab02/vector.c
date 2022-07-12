@@ -78,7 +78,7 @@ vector_t *vector_new() {
     }
 
     /* Complete the initialization by setting the single component to zero */
-    retval->data = (int *)calloc(sizeof(int), retval->size);
+    *(retval->data) = 0;
 
     /* and return... */
     return retval; /* UPDATE RETURN VALUE */
@@ -111,13 +111,8 @@ void vector_delete(vector_t *v) {
     if (v == NULL){
         return;
     }
-    for(int i = 0; i < v->size; i++) {
-        if(v->data + i != NULL) {
-            free(v->data + i);
-        }
-    }
+    free(v->data);
     free(v);
-    v = NULL;
     return;
 }
 
@@ -134,7 +129,19 @@ void vector_set(vector_t *v, size_t loc, int value) {
     }
     if(v->size >= loc) {
         *(v->data + loc) = value;
-        v->size++;
+    } else {
+        v->size = 2 * loc;
+        int *temp = (int *)malloc(sizeof(int) * v->size);
+        if (temp == NULL){
+            allocation_failed();
+        }
+        for(int i = 0; i < v->size /2; i++) {
+            *(temp + i) = *(v->data + i);
+        }
+        free(v->data);
+        *(temp + loc) = value;
+        v->data = temp;
+
     }
     return;
 }
